@@ -2,27 +2,62 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const db = require('./db'); // Ensure db.js exports the connection pool
+const { verifyToken, authorizeRole } = require('./middleware/auth');
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors({
   origin: 'http://localhost:5173', // Replace with your frontend's URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json()); // To parse JSON bodies
 
 const PORT = process.env.PORT || 5000;
 
-// Root Route
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('from backend: username:', username , 'password:', password);
+
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  console.log('sql query:', sql);
+  db.query(sql, [username], async (err, results) => {
+    if (err) {
+      console.error('Error fetching user:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = results[0];
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    // if (!isPasswordValid) {
+    //   return res.status(401).json({ error: 'Invalid username or password' });
+    // }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    console.log("Generated Token:", token)
+    res.json({ token });
+  });
+});
+
 app.get('/', (req, res) => {
   res.send('Employee Backend is running');
 });
 
-app.post('/api/employees', (req, res) => {
+app.post('/api/employees', verifyToken, authorizeRole(['admin', 'superadmin']), (req, res) => {
   const {
     employee_id,
     name,
@@ -79,14 +114,11 @@ app.post('/api/employees', (req, res) => {
   });
 });
 
-// 2. Retrieve All Employees
-app.get('/api/employees', (req, res) => {
+
+app.get('/api/employees', verifyToken, authorizeRole(['viewer', 'admin', 'superadmin']), (req, res) => {
   const sql = 'SELECT * FROM employees';
   db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Error fetching employees:', err);
-      return res.status(500).json({ error: 'Database retrieval error' });
-    }
+    if (err) return res.status(500).json({ error: 'Database retrieval error' });
     res.json(results);
   });
 });
@@ -108,7 +140,7 @@ app.get('/api/employees/:employee_id', (req, res) => {
 });
 
 // 4. Update an Existing Employee
-app.put('/api/employees/:employee_id', (req, res) => {
+app.put('/api/employees/:employee_id', verifyToken, authorizeRole(['viewer','admin', 'superadmin']), (req, res) => {
   const { employee_id } = req.params;
   const {
     name,
@@ -168,7 +200,7 @@ app.put('/api/employees/:employee_id', (req, res) => {
 });
 
 // 5. Delete an Employee
-app.delete('/api/employees/:employee_id', (req, res) => {
+app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmin']), (req, res) => {
   const { employee_id } = req.params;
   const sql = 'DELETE FROM employees WHERE employee_id = ?';
   db.query(sql, [employee_id], (err, result) => {
