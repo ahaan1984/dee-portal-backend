@@ -47,6 +47,28 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
+app.post('/api/reset-password', async (req, res) => {
+  const { username, newPassword } = req.body;
+
+  if (!username || !newPassword) {
+    return res.status(400).json({ error: 'Username and new password are required' });
+  }
+
+  const sql = 'UPDATE users SET password = ? WHERE username = ?';
+  db.query(sql, [newPassword, username], (err, result) => {
+    if (err) {
+      console.error('Error updating password:', err);
+      return res.status(500).json({ error: 'Database update error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'Password updated successfully' });
+  });
+});
+
 app.get('/', (req, res) => {
   res.send('Employee Backend is running');
 });
