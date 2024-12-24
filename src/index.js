@@ -4,7 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const db = require('./db'); // Ensure db.js exports the connection pool
+const db = require('./db'); 
 const { verifyToken, authorizeRole } = require('./middleware/auth');
 
 dotenv.config();
@@ -12,11 +12,11 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your frontend's URL
+  origin: 'http://localhost:5173', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json()); // To parse JSON bodies
+app.use(express.json()); 
 
 const PORT = process.env.PORT || 5000;
 
@@ -36,13 +36,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     const user = results[0];
-    // const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    // if (!isPasswordValid) {
-    //   return res.status(401).json({ error: 'Invalid username or password' });
-    // }
-
-    // Generate JWT token
     const token = jwt.sign(
       { username: user.username, role: user.role },
       process.env.JWT_SECRET,
@@ -123,7 +117,6 @@ app.get('/api/employees', verifyToken, authorizeRole(['viewer', 'admin', 'supera
   });
 });
 
-// 3. Retrieve a Single Employee by Employee ID
 app.get('/api/employees/:employee_id', (req, res) => {
   const { employee_id } = req.params;
   const sql = 'SELECT * FROM employees WHERE employee_id = ?';
@@ -139,7 +132,6 @@ app.get('/api/employees/:employee_id', (req, res) => {
   });
 });
 
-// 4. Update an Existing Employee
 app.put('/api/employees/:employee_id', verifyToken, authorizeRole(['viewer','admin', 'superadmin']), (req, res) => {
   const { employee_id } = req.params;
   const {
@@ -199,7 +191,6 @@ app.put('/api/employees/:employee_id', verifyToken, authorizeRole(['viewer','adm
   });
 });
 
-// 5. Delete an Employee
 app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmin']), (req, res) => {
   const { employee_id } = req.params;
   const sql = 'DELETE FROM employees WHERE employee_id = ?';
@@ -215,7 +206,6 @@ app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmi
   });
 });
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
