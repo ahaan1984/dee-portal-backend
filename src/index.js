@@ -117,7 +117,7 @@ app.post('/api/employees', verifyToken, authorizeRole(['admin', 'superadmin']), 
     cause_of_vacancy || null,
     caste || null,
     posted_against_reservation || null,
-    pwd ? 1 : 0, // Ensure boolean fields are 0 or 1
+    pwd ? 1 : 0, 
     ex_servicemen ? 1 : 0,
   ];
 
