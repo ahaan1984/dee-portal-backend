@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('./db'); 
-const { verifyToken, authorizeRole } = require('./middleware/auth');
+const { verifyToken, authorizeRole, Roles } = require('./middleware/auth');
 
 dotenv.config();
 
@@ -77,7 +77,7 @@ app.get('/', (req, res) => {
   res.send('Employee Backend is running');
 });
 
-app.post('/api/employees', verifyToken, authorizeRole(['admin', 'superadmin']), (req, res) => {
+app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
   const {
     employee_id,
     name,
@@ -135,7 +135,7 @@ app.post('/api/employees', verifyToken, authorizeRole(['admin', 'superadmin']), 
 });
 
 
-app.get('/api/employees', verifyToken, authorizeRole(['viewer', 'admin', 'superadmin']), (req, res) => {
+app.get('/api/employees', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
   const { district } = req.query;
   let sql = 'SELECT * FROM employees';
   const params = [];
@@ -166,66 +166,42 @@ app.get('/api/employees/:employee_id', (req, res) => {
   });
 });
 
-app.put('/api/employees/:employee_id', verifyToken, authorizeRole(['viewer','admin', 'superadmin']), (req, res) => {
+app.put('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
   const { employee_id } = req.params;
-  const {
-    name,
-    designation,
-    gender,
-    place_of_posting,
-    date_of_birth,
-    date_of_joining,
-    cause_of_vacancy,
-    caste,
-    posted_against_reservation,
-    pwd,
-    ex_servicemen,
-  } = req.body;
+  const updatedData = req.body;
+  const requestedBy = req.user.username;
 
-  const sql = `
-    UPDATE employees SET
-      name = ?,
-      designation = ?,
-      gender = ?,
-      place_of_posting = ?,
-      date_of_birth = ?,
-      date_of_joining = ?,
-      cause_of_vacancy = ?,
-      caste = ?,
-      posted_against_reservation = ?,
-      pwd = ?,
-      ex_servicemen = ?
-    WHERE employee_id = ?
-  `;
-
-  const values = [
-    name,
-    designation,
-    gender,
-    place_of_posting,
-    date_of_birth,
-    date_of_joining,
-    cause_of_vacancy || null,
-    caste || null,
-    posted_against_reservation || null,
-    pwd ? 1 : 0,
-    ex_servicemen ? 1 : 0,
-    employee_id,
-  ];
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error updating employee:', err);
-      return res.status(500).json({ error: 'Database update error' });
-    }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Employee not found' });
-    }
-    res.json({ employee_id, name });
+  const sql = `INSERT INTO pending_changes (employee_id, updated_data, requested_by) VALUES (?, ?, ?)`;
+  db.query(sql, [employee_id, JSON.stringify(updatedData), requestedBy], (err, result) => {
+      if (err) {
+          console.error('Error storing pending change:', err);
+          return res.status(500).json({ error: 'Database error' });
+      }
+      res.json({ message: 'Update request submitted for approval' });
   });
 });
 
-app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmin']), (req, res) => {
+app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN, Roles.ADMIN]), (req, res) => {
+  const sql = `SELECT * FROM pending_changes WHERE status = 'pending'`;
+  db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ error: 'Database retrieval error' });
+      res.json(results);
+  });
+});
+
+app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole(['superadmin']), (req, res) => {});
+
+app.put('/api/pending-changes/:id/reject', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
+  const { id } = req.params;
+  const sql = `UPDATE pending_changes SET status = 'rejected' WHERE id = ?`;
+  db.query(sql, [id], (err) => {
+      if (err) return res.status(500).json({ error: 'Error updating request status' });
+      res.json({ message: 'Change request rejected' });
+  });
+});
+
+
+app.delete('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
   const { employee_id } = req.params;
   const sql = 'DELETE FROM employees WHERE employee_id = ?';
   db.query(sql, [employee_id], (err, result) => {
@@ -241,14 +217,10 @@ app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmi
 });
 
 app.get('/api/districts', verifyToken, (req, res) => {
-  const sql = 'SELECT DISTINCT place_of_posting FROM employees';
+  const sql = 'SELECT DISTINCT place_of_posting AS district FROM employees';
   db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Error fetching districts:', err);
-      return res.status(500).json({ error: 'Database retrieval error' });
-    }
-    const districts = results.map((row) => row.place_of_posting);
-    res.json(districts);
+    if (err) return res.status(500).json({ error: 'Database retrieval error' });
+    res.json(results.map((row) => row.district));
   });
 });
 
