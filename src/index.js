@@ -18,7 +18,11 @@ app.use(cors({
 }));
 app.use(express.json()); 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
@@ -132,8 +136,16 @@ app.post('/api/employees', verifyToken, authorizeRole(['admin', 'superadmin']), 
 
 
 app.get('/api/employees', verifyToken, authorizeRole(['viewer', 'admin', 'superadmin']), (req, res) => {
-  const sql = 'SELECT * FROM employees';
-  db.query(sql, (err, results) => {
+  const { district } = req.query;
+  let sql = 'SELECT * FROM employees';
+  const params = [];
+
+  if (district) {
+    sql += ' WHERE place_of_posting = ?';
+    params.push(district);
+  }
+
+  db.query(sql, params, (err, results) => {
     if (err) return res.status(500).json({ error: 'Database retrieval error' });
     res.json(results);
   });
@@ -228,6 +240,15 @@ app.delete('/api/employees/:employee_id', verifyToken, authorizeRole(['superadmi
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.get('/api/districts', verifyToken, (req, res) => {
+  const sql = 'SELECT DISTINCT place_of_posting FROM employees';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching districts:', err);
+      return res.status(500).json({ error: 'Database retrieval error' });
+    }
+    const districts = results.map((row) => row.place_of_posting);
+    res.json(districts);
+  });
 });
+
