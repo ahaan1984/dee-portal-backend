@@ -189,7 +189,82 @@ app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN, Ro
   });
 });
 
-app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole(['superadmin']), (req, res) => {});
+app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), async (req, res) => {
+  const { id } = req.params;
+  try {
+      const [pendingChange] = await db.promise().query(
+          'SELECT * FROM pending_changes WHERE id = ? AND status = "pending"',
+          [id]
+      );
+
+      if (!pendingChange || pendingChange.length === 0) {
+          return res.status(404).json({ error: 'Pending change not found or already processed.' });
+      }
+
+      const changeData = pendingChange[0];
+      const { employee_id, updated_data } = changeData;
+
+      let parsedData;
+      if (typeof updated_data === 'string') {
+          try {
+              parsedData = JSON.parse(updated_data);
+          } catch (error) {
+              console.error('Invalid JSON in updated_data:', updated_data);
+              return res.status(400).json({ error: 'Invalid JSON in updated_data field.' });
+          }
+      } else if (typeof updated_data === 'object') {
+          parsedData = updated_data;
+      } else {
+          console.error('Unexpected data format in updated_data:', updated_data);
+          return res.status(400).json({ error: 'Unexpected data format in updated_data field.' });
+      }
+
+      const validColumns = [
+          'pwd',
+          'name',
+          'caste',
+          'gender',
+          'designation',
+          'employee_id',
+          'date_of_birth',
+          'ex_servicemen',
+          'date_of_joining',
+          'cause_of_vacancy',
+          'place_of_posting',
+          'posted_against_reservation'
+      ];
+
+      const filteredData = Object.keys(parsedData)
+          .filter(key => validColumns.includes(key))
+          .reduce((obj, key) => {
+              obj[key] = parsedData[key];
+              return obj;
+          }, {});
+
+      if (Object.keys(filteredData).length === 0) {
+          return res.status(400).json({ error: 'No valid fields to update.' });
+      }
+
+      const fields = Object.keys(filteredData).map(field => `${field} = ?`).join(', ');
+      const values = [...Object.values(filteredData), employee_id];
+
+      await db.promise().query(
+          'UPDATE pending_changes SET status = "approved" WHERE id = ?',
+          [id]
+      );
+
+      await db.promise().query(
+          `UPDATE employees SET ${fields} WHERE employee_id = ?`,
+          values
+      );
+
+      res.json({ message: 'Change approved and employee data updated successfully.' });
+  } catch (error) {
+      console.error('Error in authorising pending change:', error);
+      res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 
 app.put('/api/pending-changes/:id/reject', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
   const { id } = req.params;
