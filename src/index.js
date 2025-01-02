@@ -181,7 +181,7 @@ app.put('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.ADMIN, 
   });
 });
 
-app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN, Roles.ADMIN]), (req, res) => {
+app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
   const sql = `SELECT * FROM pending_changes WHERE status = 'pending'`;
   db.query(sql, (err, results) => {
       if (err) return res.status(500).json({ error: 'Database retrieval error' });
@@ -189,7 +189,7 @@ app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN, Ro
   });
 });
 
-app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), async (req, res) => {
+app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.SUPERADMIN]), async (req, res) => {
   const { id } = req.params;
   try {
       const [pendingChange] = await db.promise().query(
