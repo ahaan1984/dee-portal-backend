@@ -189,7 +189,7 @@ app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN]), 
   });
 });
 
-app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.SUPERADMIN]), async (req, res) => {
+app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.SUPERADMIN, Roles.ADMIN]), async (req, res) => {
   const { id } = req.params;
   try {
       const [pendingChange] = await db.promise().query(
