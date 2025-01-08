@@ -1,4 +1,3 @@
-// src/db.js
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 
@@ -20,7 +19,6 @@ const connection = mysql.createPool({
   queueLimit: 0
 });
 
-// Function to test the database connection
 const testConnection = () => {
   connection.getConnection((err, conn) => {
     if (err) {
@@ -29,11 +27,10 @@ const testConnection = () => {
     }
     console.log('Connected to MySQL as ID', conn.threadId);
     conn.release();
-    process.exit(0); // Exit successfully after the test
+    process.exit(0); 
   });
 };
 
-// If db.js is run directly, test the connection
 if (require.main === module) {
   testConnection();
 }

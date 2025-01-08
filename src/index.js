@@ -1,8 +1,6 @@
-// src/index.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('./db'); 
 const { verifyToken, authorizeRole, Roles } = require('./middleware/auth');
