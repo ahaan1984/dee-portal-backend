@@ -312,3 +312,30 @@ app.get('/api/districts', verifyToken, (req, res) => {
   });
 });
 
+app.get('/api/reports', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
+  const sql = `
+  SELECT 
+    employee_id AS id,
+    place_of_posting AS district,
+    assembly_constituency AS officeName,
+    name AS incumbentName,
+    designation AS postName,
+    cause_of_vacancy AS causeOfVacancy,
+    date_of_retirement AS dateOfVacancy, -- Assuming date_of_retirement represents this field
+    creation_no AS creationNo,
+    retention_no AS retentionNo,
+    man_in_position AS manInPosition,
+    name_of_treasury AS treasuryName
+  FROM employees
+  ORDER BY district ASC, officeName ASC
+`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching report data:', err);
+      return res.status(500).json({ error: 'Database retrieval error' });
+    }
+
+    res.json(results);
+  });
+});
