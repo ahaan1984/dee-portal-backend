@@ -89,6 +89,11 @@ app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERA
     posted_against_reservation,
     pwd,
     ex_servicemen,
+    assembly_constituency,
+    creation_no,
+    retention_no,
+    man_in_position,
+    name_of_treasury
   } = req.body;
 
   const sql = `
@@ -104,8 +109,13 @@ app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERA
       caste,
       posted_against_reservation,
       pwd,
-      ex_servicemen
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ex_servicemen,
+      assembly_constituency,
+      creation_no,
+      retention_no,
+      man_in_position,
+      name_of_treasury
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -119,8 +129,13 @@ app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERA
     cause_of_vacancy || null,
     caste || null,
     posted_against_reservation || null,
-    pwd ? 1 : 0, 
+    pwd ? 1 : 0,
     ex_servicemen ? 1 : 0,
+    assembly_constituency || null,
+    creation_no,
+    retention_no,
+    man_in_position || null,
+    name_of_treasury || null
   ];
 
   db.query(sql, values, (err, result) => {
