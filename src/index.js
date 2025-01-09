@@ -19,6 +19,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+const superadminMiddleware = [verifyToken, authorizeRole([Roles.SUPERADMIN])];
+const adminMiddleware = [verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN])];
+const viewerMiddleware = [verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN])];
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -76,7 +80,7 @@ app.get('/', (req, res) => {
   res.send('Employee Backend is running');
 });
 
-app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
+app.post('/api/employees', adminMiddleware, (req, res) => {
   const {
     employee_id,
     name,
@@ -149,7 +153,7 @@ app.post('/api/employees', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERA
 });
 
 
-app.get('/api/employees', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
+app.get('/api/employees', viewerMiddleware, (req, res) => {
   const { district } = req.query;
   let sql = 'SELECT * FROM employees';
   const params = [];
@@ -180,7 +184,7 @@ app.get('/api/employees/:employee_id', (req, res) => {
   });
 });
 
-app.put('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
+app.put('/api/employees/:employee_id', viewerMiddleware, (req, res) => {
   const { employee_id } = req.params;
   const updatedData = req.body;
   const requestedBy = req.user.username;
@@ -195,7 +199,7 @@ app.put('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.ADMIN, 
   });
 });
 
-app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
+app.get('/api/pending-changes', adminMiddleware, (req, res) => {
   const sql = `SELECT * FROM pending_changes WHERE status = 'pending'`;
   db.query(sql, (err, results) => {
       if (err) return res.status(500).json({ error: 'Database retrieval error' });
@@ -203,7 +207,7 @@ app.get('/api/pending-changes', verifyToken, authorizeRole([Roles.SUPERADMIN]), 
   });
 });
 
-app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.SUPERADMIN, Roles.ADMIN]), async (req, res) => {
+app.put('/api/pending-changes/:id/approve', verifyToken, superadminMiddleware, async (req, res) => {
   const { id } = req.params;
   try {
       const [pendingChange] = await db.promise().query(
@@ -280,7 +284,7 @@ app.put('/api/pending-changes/:id/approve', verifyToken, authorizeRole([Roles.SU
 });
 
 
-app.put('/api/pending-changes/:id/reject', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
+app.put('/api/pending-changes/:id/reject', superadminMiddleware, (req, res) => {
   const { id } = req.params;
   const sql = `UPDATE pending_changes SET status = 'rejected' WHERE id = ?`;
   db.query(sql, [id], (err) => {
@@ -290,7 +294,7 @@ app.put('/api/pending-changes/:id/reject', verifyToken, authorizeRole([Roles.SUP
 });
 
 
-app.delete('/api/employees/:employee_id', verifyToken, authorizeRole([Roles.SUPERADMIN]), (req, res) => {
+app.delete('/api/employees/:employee_id', superadminMiddleware, (req, res) => {
   const { employee_id } = req.params;
   const sql = 'DELETE FROM employees WHERE employee_id = ?';
   db.query(sql, [employee_id], (err, result) => {
@@ -313,7 +317,7 @@ app.get('/api/districts', verifyToken, (req, res) => {
   });
 });
 
-app.get('/api/reports', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), (req, res) => {
+app.get('/api/reports', viewerMiddleware, (req, res) => {
   const sql = `
   SELECT 
     employee_id AS id,
@@ -341,7 +345,7 @@ app.get('/api/reports', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, R
   });
 });
 
-app.get('/api/reports/excel-siu', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), async (req, res) => {
+app.get('/api/reports/excel-siu', viewerMiddleware, async (req, res) => {
   try {
     const sql = `
       SELECT 
