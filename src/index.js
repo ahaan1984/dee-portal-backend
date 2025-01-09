@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const ExcelJS = require('exceljs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const db = require('./db'); 
@@ -338,4 +339,65 @@ app.get('/api/reports', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, R
 
     res.json(results);
   });
+});
+
+app.get('/api/reports/excel-siu', verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN]), async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        employee_id AS id,
+        place_of_posting AS district,
+        assembly_constituency AS officeName,
+        name AS incumbentName,
+        designation AS postName,
+        cause_of_vacancy AS causeOfVacancy,
+        date_of_retirement AS dateOfVacancy,
+        creation_no AS creationNo,
+        retention_no AS retentionNo,
+        man_in_position AS manInPosition,
+        name_of_treasury AS treasuryName
+      FROM employees
+      ORDER BY district ASC, officeName ASC
+    `;
+
+    db.query(sql, async (err, results) => {
+      if (err) {
+        console.error('Error fetching report data for Excel:', err);
+        return res.status(500).json({ error: 'Database retrieval error' });
+      }
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Report');
+
+      worksheet.columns = [
+        { header: 'S.No', key: 'sno', width: 10 },
+        { header: 'District', key: 'district', width: 20 },
+        { header: 'Office Name', key: 'officeName', width: 25 },
+        { header: 'Incumbent Name', key: 'incumbentName', width: 25 },
+        { header: 'Post Name', key: 'postName', width: 25 },
+        { header: 'Cause of Vacancy', key: 'causeOfVacancy', width: 20 },
+        { header: 'Date of Vacancy', key: 'dateOfVacancy', width: 15 },
+        { header: 'Creation No.', key: 'creationNo', width: 15 },
+        { header: 'Retention No.', key: 'retentionNo', width: 15 },
+        { header: 'Man in Position', key: 'manInPosition', width: 15 },
+        { header: 'Treasury Name', key: 'treasuryName', width: 20 },
+      ];
+
+      results.forEach((row, index) => {
+        worksheet.addRow({
+          sno: index + 1,
+          ...row,
+        });
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
+
+      await workbook.xlsx.write(res);
+      res.end();
+    });
+  } catch (error) {
+    console.error('Error generating Excel report:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
