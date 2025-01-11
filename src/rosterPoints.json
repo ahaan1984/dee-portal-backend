@@ -1,0 +1,802 @@
+[
+    {
+        "rosterPointNo": 1,
+        "rosterPoint": "UR (PwD)",
+        "filters": {
+            "pwd": true,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 2,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 3,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 4,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 5,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 6,
+        "rosterPoint": "OBC/MOBC \n(Tea Tribes)",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 7,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 8,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 9,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 10,
+        "rosterPoint": "ST (H)",
+        "filters": {
+            "pwd": false,
+            "caste": "STH"
+        }
+    },
+    {
+        "rosterPointNo": 11,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 12,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 13,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 14,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 15,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 16,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 17,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 18,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 19,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 20,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 21,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 22,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 23,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 24,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 25,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 26,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 27,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 28,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 29,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 30,
+        "rosterPoint": "ST (H)",
+        "filters": {
+            "pwd": false,
+            "caste": "STH"
+        }
+    },
+    {
+        "rosterPointNo": 31,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 32,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 33,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 34,
+        "rosterPoint": "UR (PwD)",
+        "filters": {
+            "pwd": true,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 35,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 36,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 37,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 38,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 39,
+        "rosterPoint": "OBC/MOBC\n(Tea Tribes)",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 40,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 41,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 42,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 43,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 44,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 45,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 46,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 47,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 48,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 49,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 50,
+        "rosterPoint": "ST (H)",
+        "filters": {
+            "pwd": false,
+            "caste": "STH"
+        }
+    },
+    {
+        "rosterPointNo": 51,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 52,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 53,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 54,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 55,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 56,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 57,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 58,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 59,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 60,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 61,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 62,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 63,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 64,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 65,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 66,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 67,
+        "rosterPoint": "UR (PwD) OBC/MOBC",
+        "filters": {
+            "pwd": true,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 68,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 69,
+        "rosterPoint": "OBC/MOBC\n(Tea Tribes)",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 70,
+        "rosterPoint": "ST (H)",
+        "filters": {
+            "pwd": false,
+            "caste": "STH"
+        }
+    },
+    {
+        "rosterPointNo": 71,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 72,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 73,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 74,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 75,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 76,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 77,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 78,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 79,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 80,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 81,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 82,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 83,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 84,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 85,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 86,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 87,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 88,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 89,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 90,
+        "rosterPoint": "ST (H)",
+        "filters": {
+            "pwd": false,
+            "caste": "STH"
+        }
+    },
+    {
+        "rosterPointNo": 91,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 92,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 93,
+        "rosterPoint": "SC",
+        "filters": {
+            "pwd": false,
+            "caste": "SC"
+        }
+    },
+    {
+        "rosterPointNo": 94,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 95,
+        "rosterPoint": "ST(P)",
+        "filters": {
+            "pwd": false,
+            "caste": "STP"
+        }
+    },
+    {
+        "rosterPointNo": 96,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 97,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 98,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    },
+    {
+        "rosterPointNo": 99,
+        "rosterPoint": "OBC/MOBC",
+        "filters": {
+            "pwd": false,
+            "caste": "OBC/MOBC"
+        }
+    },
+    {
+        "rosterPointNo": 100,
+        "rosterPoint": "UR",
+        "filters": {
+            "pwd": false,
+            "caste": "UR"
+        }
+    }
+]

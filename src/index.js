@@ -345,7 +345,7 @@ app.get('/api/reports', viewerMiddleware, (req, res) => {
   });
 });
 
-app.get('/api/reports/excel-siu', viewerMiddleware, async (req, res) => {
+app.get('/api/reports/excel', viewerMiddleware, async (req, res) => {
   try {
     const sql = `
       SELECT 
@@ -397,6 +397,119 @@ app.get('/api/reports/excel-siu', viewerMiddleware, async (req, res) => {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
 
+      await workbook.xlsx.write(res);
+      res.end();
+    });
+  } catch (error) {
+    console.error('Error generating Excel report:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/roster-report', viewerMiddleware, async (req, res) => {
+  try {
+    const rosterPoints = require('./rosterPoints.json'); // Load the roster points JSON
+    const sql = 'SELECT * FROM employees'; // Fetch all employees
+    db.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error fetching employees:', err);
+        return res.status(500).json({ error: 'Database retrieval error' });
+      }
+
+      const normalizeEmployee = (employee) => {
+        let { caste, pwd } = employee;
+        caste = caste?.toUpperCase();
+        pwd = pwd === 1;
+        return { ...employee, caste, pwd };
+      };
+
+      const employees = results.map(normalizeEmployee);
+      const assignedData = [];
+      const usedEmployeeIds = new Set();
+
+      rosterPoints.forEach((rp) => {
+        const { caste, pwd } = rp.filters;
+        const filtered = employees.filter((emp) => {
+          const notUsed = !usedEmployeeIds.has(emp.employee_id);
+          const matchesCaste = caste ? emp.caste === caste : true;
+          const matchesPwd = pwd === undefined ? true : emp.pwd === pwd;
+          return notUsed && matchesCaste && matchesPwd;
+        });
+
+        const assignedEmployee = filtered.length > 0 ? filtered[0] : null;
+        if (assignedEmployee) {
+          usedEmployeeIds.add(assignedEmployee.employee_id);
+        }
+        assignedData.push({
+          ...rp,
+          employee: assignedEmployee,
+          district: assignedEmployee?.place_of_posting || 'N/A',
+          remarks: '',
+        });
+      });
+
+      res.json(assignedData.sort((a, b) => a.rosterPointNo - b.rosterPointNo));
+    });
+  } catch (error) {
+    console.error('Error in /api/roster-report:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/roster/excel', viewerMiddleware, async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        employee_id, name, designation, place_of_posting, 
+        date_of_joining, caste, pwd
+      FROM employees
+    `;
+
+    db.query(sql, async (err, results) => {
+      if (err) {
+        console.error('Error fetching roster data:', err);
+        return res.status(500).json({ error: 'Database retrieval error' });
+      }
+
+      const rosterPoints = [
+        { rosterPointNo: 1, rosterPoint: 'UR (PwD)', filters: { caste: 'UR', pwd: true } },
+        { rosterPointNo: 2, rosterPoint: 'OBC/MOBC', filters: { caste: 'OBC/MOBC' } },
+      ];
+
+      const normalizeEmployee = (employee) => {
+        let { caste, pwd } = employee;
+        if (caste) {
+          caste = caste.toUpperCase().includes('OBC') ? 'OBC/MOBC' : 'UR';
+        }
+        pwd = pwd === 1;
+        return { ...employee, caste, pwd };
+      };
+
+      const employees = results.map(normalizeEmployee);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Roster Report');
+
+      worksheet.columns = [
+        { header: 'Roster Point No.', key: 'rosterPointNo', width: 15 },
+        { header: 'Roster Point', key: 'rosterPoint', width: 20 },
+        { header: 'Name', key: 'name', width: 25 },
+        { header: 'Designation', key: 'designation', width: 25 },
+        { header: 'Date of Joining', key: 'dateOfJoining', width: 15 },
+      ];
+
+      rosterPoints.forEach((rp) => {
+        const filtered = employees.find((emp) => emp.caste === rp.filters.caste && emp.pwd === rp.filters.pwd);
+        worksheet.addRow({
+          rosterPointNo: rp.rosterPointNo,
+          rosterPoint: rp.rosterPoint,
+          name: filtered ? filtered.name : 'N/A',
+          designation: filtered ? filtered.designation : 'N/A',
+          dateOfJoining: filtered ? filtered.date_of_joining : 'N/A',
+        });
+      });
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=roster_report.xlsx');
       await workbook.xlsx.write(res);
       res.end();
     });
