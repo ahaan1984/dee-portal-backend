@@ -20,8 +20,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 const superadminMiddleware = [verifyToken, authorizeRole([Roles.SUPERADMIN])];
-const adminMiddleware = [verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN])];
-const viewerMiddleware = [verifyToken, authorizeRole([Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN])];
+const adminMiddleware = [verifyToken, authorizeRole([Roles.DISTRICT_ADMIN, Roles.ADMIN, Roles.SUPERADMIN])];
+const viewerMiddleware = [verifyToken, authorizeRole([Roles.DISTRICT_ADMIN, Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN])];
+// const districtAdminMiddleware = [verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN, Roles.DISTRICT_ADMIN])];
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -31,7 +32,7 @@ app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   console.log('from backend: username:', username , 'password:', password);
 
-  const sql = 'SELECT * FROM users WHERE username = ?';
+  const sql = 'SELECT username, role, district FROM users WHERE username = ?';
   console.log('sql query:', sql);
   db.query(sql, [username], async (err, results) => {
     if (err) {
@@ -45,10 +46,10 @@ app.post('/api/login', async (req, res) => {
     const user = results[0];
 
     const token = jwt.sign(
-      { username: user.username, role: user.role },
+      { username: user.username, role: user.role, district: user.district},
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
-    );
+  );
     console.log("Generated Token:", token)
     res.json({ token });
   });
@@ -154,14 +155,14 @@ app.post('/api/employees', adminMiddleware, (req, res) => {
 
 
 app.get('/api/employees', viewerMiddleware, (req, res) => {
-  const { district } = req.query;
+  const { district } = req.user; 
   let sql = 'SELECT * FROM employees';
   const params = [];
 
-  if (district) {
+  if (req.user.role === Roles.DISTRICT_ADMIN) {
     sql += ' WHERE place_of_posting = ?';
     params.push(district);
-  }
+}
 
   db.query(sql, params, (err, results) => {
     if (err) return res.status(500).json({ error: 'Database retrieval error' });

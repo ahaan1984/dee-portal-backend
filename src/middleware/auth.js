@@ -31,6 +31,7 @@ const Roles = {
   ADMIN: 'admin',
   SUPERADMIN: 'superadmin',
   VIEWER: 'viewer',
+  DISTRICT_ADMIN: 'district_admin'
 };
 
 module.exports = { verifyToken, authorizeRole, Roles };
