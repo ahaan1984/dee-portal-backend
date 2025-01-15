@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const db = require('./db'); 
 const { verifyToken, authorizeRole, Roles } = require('./middleware/auth');
+const { getDistrictFromID } = require('./idGenerator');
 
 dotenv.config();
 
@@ -21,8 +22,7 @@ const PORT = process.env.PORT || 3000;
 
 const superadminMiddleware = [verifyToken, authorizeRole([Roles.SUPERADMIN])];
 const adminMiddleware = [verifyToken, authorizeRole([Roles.DISTRICT_ADMIN, Roles.ADMIN, Roles.SUPERADMIN])];
-const viewerMiddleware = [verifyToken, authorizeRole([Roles.DISTRICT_ADMIN, Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN])];
-// const districtAdminMiddleware = [verifyToken, authorizeRole([Roles.ADMIN, Roles.SUPERADMIN, Roles.DISTRICT_ADMIN])];
+const viewerMiddleware = [verifyToken, authorizeRole([Roles.DISTRICT_ADMIN, Roles.VIEWER, Roles.ADMIN, Roles.SUPERADMIN, Roles.DISTRICT_VIEWER])];
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -30,27 +30,37 @@ app.listen(PORT, () => {
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  console.log('from backend: username:', username , 'password:', password);
 
-  const sql = 'SELECT username, role, district FROM users WHERE username = ?';
-  console.log('sql query:', sql);
+  const sql = 'SELECT username, password, role, district FROM users WHERE username = ?';
+  
   db.query(sql, [username], async (err, results) => {
     if (err) {
       console.error('Error fetching user:', err);
       return res.status(500).json({ error: 'Database error' });
     }
+    
     if (results.length === 0) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     const user = results[0];
+    
+    // If no password is set, require setup
+    if (!user.password) {
+      return res.json({ requiresPasswordSetup: true });
+    }
+    
+    // Check if provided password matches
+    if (user.password !== password) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
 
     const token = jwt.sign(
-      { username: user.username, role: user.role, district: user.district},
+      { username: user.username, role: user.role, district: user.district },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
-  );
-    console.log("Generated Token:", token)
+    );
+
     res.json({ token });
   });
 });
@@ -77,11 +87,37 @@ app.post('/api/reset-password', async (req, res) => {
   });
 });
 
+app.post('/api/check-user', async (req, res) => {
+  const { username } = req.body;
+
+  const sql = 'SELECT username, password FROM users WHERE username = ?';
+  
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('Error checking user:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid username' });
+    }
+
+    const user = results[0];
+    
+    // Check if password field is null or empty
+    if (!user.password) {
+      return res.json({ requiresPasswordSetup: true });
+    }
+    
+    res.json({ requiresPasswordSetup: false });
+  });
+});
+
 app.get('/', (req, res) => {
   res.send('Employee Backend is running');
 });
 
-app.post('/api/employees', adminMiddleware, (req, res) => {
+app.post('/api/employees', adminMiddleware, async (req, res) => {
   const {
     employee_id,
     name,
@@ -102,67 +138,119 @@ app.post('/api/employees', adminMiddleware, (req, res) => {
     name_of_treasury
   } = req.body;
 
-  const sql = `
-    INSERT INTO employees (
-      employee_id,
-      name,
-      designation,
-      gender,
-      place_of_posting,
-      date_of_birth,
-      date_of_joining,
-      cause_of_vacancy,
-      caste,
-      posted_against_reservation,
-      pwd,
-      ex_servicemen,
-      assembly_constituency,
-      creation_no,
-      retention_no,
-      man_in_position,
-      name_of_treasury
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  const connection = await db.promise().getConnection();
+  await connection.beginTransaction();
 
-  const values = [
-    employee_id,
-    name,
-    designation,
-    gender,
-    place_of_posting,
-    date_of_birth,
-    date_of_joining,
-    cause_of_vacancy || null,
-    caste || null,
-    posted_against_reservation || null,
-    pwd ? 1 : 0,
-    ex_servicemen ? 1 : 0,
-    assembly_constituency || null,
-    creation_no,
-    retention_no,
-    man_in_position || null,
-    name_of_treasury || null
-  ];
+  try {
+    let finalEmployeeID = employee_id;
 
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('Error inserting employee:', err);
-      return res.status(500).json({ error: 'Database insertion error' });
+    if (!finalEmployeeID) {
+      // Get the district code (DD)
+      const districtIndex = districts.indexOf(place_of_posting) + 1;
+      const DD = districtIndex.toString().padStart(2, '0');
+      
+      // Set role digit (R)
+      const R = '1'; // Default to district_admin for new employees
+      
+      // Get current max sequence number for this district and role
+      const [result] = await connection.query(
+        'SELECT MAX(CAST(RIGHT(employee_id, 2) AS UNSIGNED)) as max_seq ' +
+        'FROM employees WHERE LEFT(employee_id, 2) = ? AND SUBSTRING(employee_id, 3, 1) = ?',
+        [DD, R]
+      );
+      
+      // Calculate next sequence number
+      const currentSeq = result[0].max_seq || 0;
+      const XX = (currentSeq + 1).toString().padStart(2, '0');
+      
+      // Construct the ID
+      finalEmployeeID = `${DD}${R}${XX}`;
     }
-    res.status(201).json({ id: result.insertId, employee_id, name });
-  });
+
+    // Validate the district from ID
+    const district = getDistrictFromID(finalEmployeeID);
+    const finalDistrict = district || place_of_posting;
+
+    // Determine role from ID structure
+    const roleDigit = finalEmployeeID.charAt(2);
+    const districtCode = finalEmployeeID.slice(0, 2);
+    
+    let role;
+    if (districtCode === "00") {
+      role = roleDigit === "1" ? "superadmin" : 
+             roleDigit === "2" ? "admin" : 
+             roleDigit === "0" ? "viewer" : null;
+    } else {
+      role = roleDigit === "1" ? "district_admin" : 
+             roleDigit === "0" ? "district_viewer" : null;
+    }
+
+    if (!role) {
+      throw new Error(`Invalid role digit in employee ID: ${roleDigit}`);
+    }
+
+    // Insert employee record
+    const employeeSQL = `
+      INSERT INTO employees (
+        employee_id, name, designation, gender, place_of_posting,
+        date_of_birth, date_of_joining, cause_of_vacancy, caste,
+        posted_against_reservation, pwd, ex_servicemen,
+        assembly_constituency, creation_no, retention_no,
+        man_in_position, name_of_treasury
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const employeeValues = [
+      finalEmployeeID, name, designation, gender, finalDistrict,
+      date_of_birth, date_of_joining, cause_of_vacancy || null,
+      caste || null, posted_against_reservation || null,
+      pwd ? 1 : 0, ex_servicemen ? 1 : 0,
+      assembly_constituency || null, creation_no || null,
+      retention_no || null, man_in_position || null,
+      name_of_treasury || null
+    ];
+
+    await connection.query(employeeSQL, employeeValues);
+
+    // Insert user record for authentication
+    const userSQL = `
+      INSERT INTO users (username, role, district) 
+      VALUES (?, ?, ?)
+    `;
+    
+    await connection.query(userSQL, [finalEmployeeID, role, finalDistrict]);
+
+    await connection.commit();
+
+    res.status(201).json({ 
+      id: finalEmployeeID,
+      employee_id: finalEmployeeID,
+      name,
+      role,
+      district: finalDistrict
+    });
+
+  } catch (err) {
+    await connection.rollback();
+    console.error('Error in employee creation:', err);
+    res.status(500).json({ 
+      error: 'Employee creation failed',
+      details: err.message 
+    });
+  } finally {
+    connection.release();
+  }
 });
 
-
 app.get('/api/employees', viewerMiddleware, (req, res) => {
-  const { district } = req.user; 
+  const { district, role } = req.user; 
   let sql = 'SELECT * FROM employees';
   const params = [];
 
-  if (req.user.role === Roles.DISTRICT_ADMIN) {
+  if (role === Roles.DISTRICT_ADMIN || role === Roles.DISTRICT_VIEWER) {
     sql += ' WHERE place_of_posting = ?';
     params.push(district);
-}
+  }
 
   db.query(sql, params, (err, results) => {
     if (err) return res.status(500).json({ error: 'Database retrieval error' });
