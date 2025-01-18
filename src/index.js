@@ -45,12 +45,10 @@ app.post('/api/login', async (req, res) => {
 
     const user = results[0];
     
-    // If no password is set, require setup
     if (!user.password) {
       return res.json({ requiresPasswordSetup: true });
     }
     
-    // Check if provided password matches
     if (user.password !== password) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
@@ -104,7 +102,6 @@ app.post('/api/check-user', async (req, res) => {
 
     const user = results[0];
     
-    // Check if password field is null or empty
     if (!user.password) {
       return res.json({ requiresPasswordSetup: true });
     }
@@ -134,6 +131,10 @@ app.post('/api/employees', adminMiddleware, async (req, res) => {
     assembly_constituency,
     creation_no,
     retention_no,
+    date_of_suspension,
+    date_of_reinstatement, 
+    date_of_promotion, 
+    date_of_regularisation,
     man_in_position,
     name_of_treasury
   } = req.body;
@@ -145,33 +146,26 @@ app.post('/api/employees', adminMiddleware, async (req, res) => {
     let finalEmployeeID = employee_id;
 
     if (!finalEmployeeID) {
-      // Get the district code (DD)
       const districtIndex = districts.indexOf(place_of_posting) + 1;
       const DD = districtIndex.toString().padStart(2, '0');
       
-      // Set role digit (R)
-      const R = '1'; // Default to district_admin for new employees
+      const R = '1'; 
       
-      // Get current max sequence number for this district and role
       const [result] = await connection.query(
         'SELECT MAX(CAST(RIGHT(employee_id, 2) AS UNSIGNED)) as max_seq ' +
         'FROM employees WHERE LEFT(employee_id, 2) = ? AND SUBSTRING(employee_id, 3, 1) = ?',
         [DD, R]
       );
       
-      // Calculate next sequence number
       const currentSeq = result[0].max_seq || 0;
       const XX = (currentSeq + 1).toString().padStart(2, '0');
       
-      // Construct the ID
       finalEmployeeID = `${DD}${R}${XX}`;
     }
 
-    // Validate the district from ID
     const district = getDistrictFromID(finalEmployeeID);
     const finalDistrict = district || place_of_posting;
 
-    // Determine role from ID structure
     const roleDigit = finalEmployeeID.charAt(2);
     const districtCode = finalEmployeeID.slice(0, 2);
     
@@ -189,15 +183,15 @@ app.post('/api/employees', adminMiddleware, async (req, res) => {
       throw new Error(`Invalid role digit in employee ID: ${roleDigit}`);
     }
 
-    // Insert employee record
     const employeeSQL = `
       INSERT INTO employees (
         employee_id, name, designation, gender, place_of_posting,
         date_of_birth, date_of_joining, cause_of_vacancy, caste,
         posted_against_reservation, pwd, ex_servicemen,
         assembly_constituency, creation_no, retention_no,
-        man_in_position, name_of_treasury
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        man_in_position, name_of_treasury, date_of_suspension, 
+        date_of_reinstatement, date_of_promotion, date_of_regularisation
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const employeeValues = [
@@ -207,12 +201,12 @@ app.post('/api/employees', adminMiddleware, async (req, res) => {
       pwd ? 1 : 0, ex_servicemen ? 1 : 0,
       assembly_constituency || null, creation_no || null,
       retention_no || null, man_in_position || null,
-      name_of_treasury || null
+      name_of_treasury || null, date_of_suspension, date_of_reinstatement,
+      date_of_promotion, date_of_regularisation
     ];
 
     await connection.query(employeeSQL, employeeValues);
 
-    // Insert user record for authentication
     const userSQL = `
       INSERT INTO users (username, role, district) 
       VALUES (?, ?, ?)
@@ -336,7 +330,11 @@ app.put('/api/pending-changes/:id/approve', verifyToken, superadminMiddleware, a
           'date_of_birth',
           'ex_servicemen',
           'date_of_joining',
-          'cause_of_vacancy',
+          'date_of_suspension', 
+          'date_of_reinstatement', 
+          'date_of_promotion date', 
+          'date_of_regularisation',
+          'cause_of_vacancy',,
           'place_of_posting',
           'posted_against_reservation'
       ];
@@ -497,8 +495,8 @@ app.get('/api/reports/excel', viewerMiddleware, async (req, res) => {
 
 app.get('/api/roster-report', viewerMiddleware, async (req, res) => {
   try {
-    const rosterPoints = require('./rosterPoints.json'); // Load the roster points JSON
-    const sql = 'SELECT * FROM employees'; // Fetch all employees
+    const rosterPoints = require('./rosterPoints.json'); 
+    const sql = 'SELECT * FROM employees'; 
     db.query(sql, (err, results) => {
       if (err) {
         console.error('Error fetching employees:', err);
